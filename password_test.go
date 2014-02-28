@@ -6,30 +6,30 @@ import (
 )
 
 
-func TestPasswordGenerator(t *testing.T) {
+func TestGetPassword(t *testing.T) {
 	p, err := GetNumericPassword(14,20)
 	if err != nil {
-		t.Error("Error generating password", err)
+		t.Fatal("Error generating password", err)
 	}
 	if len(p) >20 || len(p)<14 {
 		t.Error("Incorrect sized password returned")
 	}
 }
 
-func TestPasswordGeneratorSameSize(t *testing.T) {
+func TestGetPasswordSameSize(t *testing.T) {
 	p, err := GetNumericPassword(4,4)
 	if err != nil {
-		t.Error("Error generating password", err)
+		t.Fatal("Error generating password", err)
 	}
 	if len(p) != 4 {
 		t.Error("Incorrect sized password returned")
 	}
 }
 
-func TestPasswordGeneratorOddSize(t *testing.T) {
+func TestGetPasswordOddSize(t *testing.T) {
 	p, err := GetNumericPassword(15,15)
 	if err != nil {
-		t.Error("Error generating password", err)
+		t.Fatal("Error generating password", err)
 	}
 	if len(p) != 15 {
 		t.Error("Incorrect sized password returned")
@@ -37,10 +37,10 @@ func TestPasswordGeneratorOddSize(t *testing.T) {
 }
 
 var digits = "1234567890"
-func TestNumericPasswordGenerator(t *testing.T) {
+func TestGetNumericPassword(t *testing.T) {
 	p, err := GetNumericPassword(14,20)
 	if err != nil {
-		t.Error("Error generating password", err)
+		t.Fatal("Error generating password", err)
 	}
 	for _,c := range p {
 		if ! strings.ContainsRune(digits,c) {
@@ -51,10 +51,10 @@ func TestNumericPasswordGenerator(t *testing.T) {
 }
 
 var alpha_lower = "abcdefghijklmnopqrstuvwxyz"
-func TestAlphaLowerPasswordGenerator(t *testing.T) {
+func TestGetAlphaLowerPassword(t *testing.T) {
 	p, err := GetAlphaLowerPassword(14,20)
 	if err != nil {
-		t.Error("Error generating password", err)
+		t.Fatal("Error generating password", err)
 	}
 	for _,c := range p {
 		if ! strings.ContainsRune(alpha_lower,c) {
@@ -65,10 +65,10 @@ func TestAlphaLowerPasswordGenerator(t *testing.T) {
 }
 
 var alpha_upper = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-func TestAlphaUpperPasswordGenerator(t *testing.T) {
+func TestGetAlphaUpperPassword(t *testing.T) {
 	p, err := GetAlphaUpperPassword(14,20)
 	if err != nil {
-		t.Error("Error generating password", err)
+		t.Fatal("Error generating password", err)
 	}
 	for _,c := range p {
 		if ! strings.ContainsRune(alpha_upper,c) {
@@ -78,10 +78,10 @@ func TestAlphaUpperPasswordGenerator(t *testing.T) {
 	}
 }
 
-func TestAlphaPasswordGenerator(t *testing.T) {
+func TestGetAlphaPassword(t *testing.T) {
 	p, err := GetAlphaPassword(14,20)
 	if err != nil {
-		t.Error("Error generating password", err)
+		t.Fatal("Error generating password", err)
 	}
 	for _,c := range p {
 		if ! strings.ContainsRune(alpha_upper+alpha_lower,c) {
@@ -93,10 +93,10 @@ func TestAlphaPasswordGenerator(t *testing.T) {
 
 
 var symbols = " !@#$%^&*()`~-_=+[{]}\\|,<.>/?;:'\""
-func TestSecurePasswordGenerator(t *testing.T) {
+func TestGetSecurePassword(t *testing.T) {
 	p, err := GetSecurePassword(14,20)
 	if err != nil {
-		t.Error("Error generating password", err)
+		t.Fatal("Error generating password", err)
 	}
 	for _,c := range p {
 		if ! strings.ContainsRune(alpha_upper+alpha_lower+symbols+digits,c) {
@@ -107,10 +107,10 @@ func TestSecurePasswordGenerator(t *testing.T) {
 }
 
 
-func TestLargePasswordGenerator(t *testing.T) {
+func TestGetLargePassword(t *testing.T) {
 	p, err := GetSecurePassword(40,200)
 	if err != nil {
-		t.Error("Error generating password", err)
+		t.Fatal("Error generating password", err)
 	}
 	if len(p) >200 || len(p)<40 {
 		t.Error("Incorrect sized password returned")
@@ -124,12 +124,12 @@ func TestLargePasswordGenerator(t *testing.T) {
 }
 
 
-func TestMultiplePasswordGenerator(t *testing.T) {
+func TestPasswordGenerator(t *testing.T) {
 	gen := GetSecurePasswordGenerator()
 	for i:=0; i<5; i++ {
 		p, err := gen.GeneratePassword(14,20)
 		if err != nil {
-			t.Error("Error generating password", err)
+			t.Fatal("Error generating password", err)
 		}
 		if len(p) >20 || len(p)<14 {
 			t.Error("Incorrect sized password returned")

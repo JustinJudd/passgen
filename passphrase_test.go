@@ -6,15 +6,15 @@ import (
 )
 
 
-func TestPassphraseGenerator(t *testing.T) {
+func TestGetPassphrase(t *testing.T) {
 
 	p, err := GetXKCDPassphrase(4)
 	if err != nil {
-		t.Error("Error generating passphrase", err)
+		t.Fatal("Error generating passphrase", err)
 	}
 	s := strings.Split(p, " ")
 	if len(s) != 4 {
-		t.Fatal("Incorrect sized password returned. Expected: %d\t Actual: %d", 4, len(s))
+		t.Error("Incorrect sized password returned. Expected: %d\t Actual: %d", 4, len(s))
 	}
 	for _, w := range s {
 		if len(w)>10 || len(w)<4 {
@@ -25,7 +25,7 @@ func TestPassphraseGenerator(t *testing.T) {
 
 
 
-func TestMultiplePassphraseGenerator(t *testing.T) {
+func TestPassphraseGenerator(t *testing.T) {
 	gen, err := GetXKCDPassphraseGenerator()
 	if err != nil {
 		t.Fatal("Error generating passphrase generator", err)
