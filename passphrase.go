@@ -2,7 +2,6 @@ package passgen
 
 import (
 	"crypto/rand"
-	"fmt"
 	"math/big"
 	"bufio"
 	"os"
@@ -12,6 +11,7 @@ import (
 	"encoding/base64"
 	"compress/gzip"
 	"bytes"
+	"errors"
 )
 
 
@@ -22,7 +22,7 @@ func GetXKCDPassphrase(numWords int) (string, error) {
 	if err != nil {
 		return "", err
 	}
-    return gen.GeneratePassphrase(numWords), err
+    return gen.GeneratePassphrase(numWords), nil
 }
 
 // Generate a Passphrase using the configuration options of the Passphrase Generator
@@ -53,8 +53,14 @@ func NewPassphraseGenerator(dictFile string, min, max int) (*PassphraseGenerator
 	switch dictFile {
 	case "internal":
 		err = p.loadMemoryDict()
+		if err != nil {
+			err = errors.New("Unable to load internal memory")
+		}
 	default:
 		err = p.loadDict()
+		if err != nil {
+			err = errors.New("Unable to load dictionary file")
+		}
 	} 
 	return p, err
 }
@@ -63,18 +69,18 @@ func (p *PassphraseGenerator) loadMemoryDict() error {
 	var dict []string 
 	b, err := base64.StdEncoding.DecodeString(dictStored)
 	if err != nil {
-		return err
+		return errors.New("Unable to decode internal dictionary")
 	}
 	buf := bytes.NewBuffer(b)
 	z, err := gzip.NewReader(buf)
 	if err != nil {
-		return err
+		return errors.New("Unable to decompress internal dictionary")
 	}
 	defer z.Close()
 	enc := gob.NewDecoder(z)
 	err = enc.Decode(&dict)
 	if err != nil {
-		return err
+		return errors.New("Unable to decode internal dictionary")
 	}
 	for _, line := range dict {
 		if len(line)>=p.MinWordLength && len(line)<=p.MaxWordLength {
@@ -89,8 +95,7 @@ func (p *PassphraseGenerator) loadMemoryDict() error {
 func (p *PassphraseGenerator) loadDict() error {
 	file, err := os.Open(p.DictionaryFile) 
 	if err != nil {
-		fmt.Println("Unable to open dict")
-		return err
+		return errors.New("Unable to open dictionary file")
 	}
 	defer file.Close()
 
@@ -101,7 +106,7 @@ func (p *PassphraseGenerator) loadDict() error {
 			p.dict = append(p.dict, line)
 		}
 	}
-	return err
+	return nil
 
 }
 

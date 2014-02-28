@@ -8,6 +8,7 @@ import (
 	"crypto/rand"
 	"math"
 	"math/big"
+	"errors"
 )
 
 
@@ -74,7 +75,7 @@ func (p *PasswordGenerator) GeneratePassword(min, max int) (string, error)  {
 	if min != max {
 		l, err := rand.Int(rand.Reader, big.NewInt(int64(max-min) ))
 		if err != nil {
-			return "", nil
+			return "", errors.New("Unable to generate random length")
 		}
 		length = int(l.Int64()) + min
 	}
@@ -83,7 +84,7 @@ func (p *PasswordGenerator) GeneratePassword(min, max int) (string, error)  {
 	b := make([]byte, max)
 	_, err := rand.Read(b)
 	if err != nil {
-	    return "", err
+	    return "", errors.New("Unable to generate random data")
 	}
 
 	
