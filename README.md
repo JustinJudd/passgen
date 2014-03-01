@@ -12,7 +12,7 @@ passgen CLI
 Install
 -------
 ### Getting passgen
-There are two ways to install passgen. Binaries will be linked here, or you can build it yourself.
+There are two ways to install passgen. The latest binaries are [here](https://github.com/JustinJudd/passgen/releases/latest), or you can build it yourself.
 
 #### Building passgen
     $ go get github.com/JustinJudd/passgen/passgen
