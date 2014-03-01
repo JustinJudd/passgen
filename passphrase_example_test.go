@@ -38,7 +38,7 @@ func ExampleNewPassphraseGenerator() {
 
 func ExampleNewPassphraseGenerator_dictionaryFile() {
 	// This example will create a passphrase generator that will use a custom dictionary file for finding words
-	gen, err := NewPassphraseGenerator("path/to/dictioanry", 4, 8)
+	gen, err := NewPassphraseGenerator("path/to/dictionary", 4, 8)
 	if err != nil {
 		// Handle error
 	}
