@@ -1,6 +1,5 @@
 package passgen
 
-
 import (
 	"fmt"
 )
@@ -19,7 +18,7 @@ func ExamplePassphraseGenerator() {
 	if err != nil {
 		// Handle error
 	}
-	for i:=0; i<5; i++ {
+	for i := 0; i < 5; i++ {
 		p := gen.GeneratePassphrase(4)
 		fmt.Println(p)
 	}
@@ -31,7 +30,7 @@ func ExampleNewPassphraseGenerator() {
 	if err != nil {
 		// Handle error
 	}
-	for i:=0; i<5; i++ {
+	for i := 0; i < 5; i++ {
 		p := gen.GeneratePassphrase(6)
 		fmt.Println(p)
 	}
@@ -43,9 +42,8 @@ func ExampleNewPassphraseGenerator_dictionaryFile() {
 	if err != nil {
 		// Handle error
 	}
-	for i:=0; i<5; i++ {
+	for i := 0; i < 5; i++ {
 		p := gen.GeneratePassphrase(4)
 		fmt.Println(p)
 	}
 }
-

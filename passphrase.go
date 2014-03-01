@@ -1,20 +1,18 @@
 package passgen
 
 import (
+	"bufio"
 	"crypto/rand"
 	"math/big"
-	"bufio"
 	"os"
 	"strings"
 
-	"encoding/gob"
-	"encoding/base64"
-	"compress/gzip"
 	"bytes"
+	"compress/gzip"
+	"encoding/base64"
+	"encoding/gob"
 	"errors"
 )
-
-
 
 // Quickly get a Passphrase according to XKCD example(http://xkcd.com/936/)
 func GetXKCDPassphrase(numWords int) (string, error) {
@@ -22,22 +20,21 @@ func GetXKCDPassphrase(numWords int) (string, error) {
 	if err != nil {
 		return "", err
 	}
-    return gen.GeneratePassphrase(numWords), nil
+	return gen.GeneratePassphrase(numWords), nil
 }
 
 // Generate a Passphrase using the configuration options of the Passphrase Generator
 func (p *PassphraseGenerator) GeneratePassphrase(numWords int) string {
 	words := make([]string, numWords)
-	l := big.NewInt( int64(len(p.dict) ) )
-	for i:=0;i<numWords;i++ {
+	l := big.NewInt(int64(len(p.dict)))
+	for i := 0; i < numWords; i++ {
 		// Randomly choose an index for a word from the dictionary
-		n,_ := rand.Int(rand.Reader, l)
+		n, _ := rand.Int(rand.Reader, l)
 		words[i] = p.dict[n.Int64()]
 	}
 	// Collapse all of the chosen words into a string
 	return strings.Join(words, " ")
 }
-
 
 // Get a Passphrase Generator that exceeds the XKCD example (http://xkcd.com/936/).
 // Creates a Passphrase Generator that chooses 4 words of between 4 to 10 characters long
@@ -61,12 +58,12 @@ func NewPassphraseGenerator(dictFile string, min, max int) (*PassphraseGenerator
 		if err != nil {
 			err = errors.New("Unable to load dictionary file")
 		}
-	} 
+	}
 	return p, err
 }
 
 func (p *PassphraseGenerator) loadMemoryDict() error {
-	var dict []string 
+	var dict []string
 	b, err := base64.StdEncoding.DecodeString(dictStored)
 	if err != nil {
 		return errors.New("Unable to decode internal dictionary")
@@ -83,7 +80,7 @@ func (p *PassphraseGenerator) loadMemoryDict() error {
 		return errors.New("Unable to decode internal dictionary")
 	}
 	for _, line := range dict {
-		if len(line)>=p.MinWordLength && len(line)<=p.MaxWordLength {
+		if len(line) >= p.MinWordLength && len(line) <= p.MaxWordLength {
 			p.dict = append(p.dict, line)
 		}
 	}
@@ -93,7 +90,7 @@ func (p *PassphraseGenerator) loadMemoryDict() error {
 // Load a Dictionary File referenced in the Passphrase Generator.
 // Extract all words that meet the requirements in the Generator config
 func (p *PassphraseGenerator) loadDict() error {
-	file, err := os.Open(p.DictionaryFile) 
+	file, err := os.Open(p.DictionaryFile)
 	if err != nil {
 		return errors.New("Unable to open dictionary file")
 	}
@@ -102,7 +99,7 @@ func (p *PassphraseGenerator) loadDict() error {
 	scanner := bufio.NewScanner(file)
 	for scanner.Scan() {
 		line := scanner.Text()
-		if len(line)>=p.MinWordLength && len(line)<=p.MaxWordLength {
+		if len(line) >= p.MinWordLength && len(line) <= p.MaxWordLength {
 			p.dict = append(p.dict, line)
 		}
 	}
@@ -114,13 +111,11 @@ func (p *PassphraseGenerator) loadDict() error {
 // Can be reused to generate as many sequential passphrases as desired
 type PassphraseGenerator struct {
 	// Path of the Dictionary file to extract words from
-	DictionaryFile 	string
-	
+	DictionaryFile string
+
 	// Minimumum and Maximum word lengths of words that should be allowed in the passphrase
-	MinWordLength, MaxWordLength 	int
+	MinWordLength, MaxWordLength int
 
 	// An internal slice of allowed words
-	dict 	[]string
+	dict []string
 }
-
-
