@@ -1,9 +1,9 @@
 package passgen
 
 import (
+	"fmt"
 	"strings"
 	"testing"
-	"fmt"
 )
 
 func TestGetPassword(t *testing.T) {
@@ -125,7 +125,6 @@ func TestGetLargePassword(t *testing.T) {
 	}
 }
 
-
 func TestGetLargeNumericPassword(t *testing.T) {
 	p, err := GetNumericPassword(40, 200)
 	if err != nil {
@@ -161,8 +160,6 @@ func TestPasswordGenerator(t *testing.T) {
 
 }
 
-
-
 func TestGetPasswordBias(t *testing.T) {
 	N := 10000000
 	var freq [10]map[rune]int
@@ -194,4 +191,3 @@ func TestGetPasswordBias(t *testing.T) {
 	}
 	t.Fatal("")
 }
-
