@@ -3,6 +3,7 @@ package passgen
 import (
 	"strings"
 	"testing"
+	"fmt"
 )
 
 func TestGetPassword(t *testing.T) {
@@ -44,7 +45,7 @@ func TestGetNumericPassword(t *testing.T) {
 	}
 	for _, c := range p {
 		if !strings.ContainsRune(digits, c) {
-			t.Errorf("Invalid character found: %c", c)
+			t.Errorf("Invalid character found: %c (%x)", c, c)
 			break
 		}
 	}
@@ -59,7 +60,7 @@ func TestGetAlphaLowerPassword(t *testing.T) {
 	}
 	for _, c := range p {
 		if !strings.ContainsRune(alpha_lower, c) {
-			t.Errorf("Invalid character found: %c", c)
+			t.Errorf("Invalid character found: %c (%x)", c, c)
 			break
 		}
 	}
@@ -74,7 +75,7 @@ func TestGetAlphaUpperPassword(t *testing.T) {
 	}
 	for _, c := range p {
 		if !strings.ContainsRune(alpha_upper, c) {
-			t.Errorf("Invalid character found: %c", c)
+			t.Errorf("Invalid character found: %c (%x)", c, c)
 			break
 		}
 	}
@@ -87,7 +88,7 @@ func TestGetAlphaPassword(t *testing.T) {
 	}
 	for _, c := range p {
 		if !strings.ContainsRune(alpha_upper+alpha_lower, c) {
-			t.Errorf("Invalid character found: %c", c)
+			t.Errorf("Invalid character found: %c (%x)", c, c)
 			break
 		}
 	}
@@ -102,7 +103,7 @@ func TestGetSecurePassword(t *testing.T) {
 	}
 	for _, c := range p {
 		if !strings.ContainsRune(alpha_upper+alpha_lower+symbols+digits, c) {
-			t.Errorf("Invalid character found: %c", c)
+			t.Errorf("Invalid character found: %c (%x)", c, c)
 			break
 		}
 	}
@@ -118,12 +119,28 @@ func TestGetLargePassword(t *testing.T) {
 	}
 	for _, c := range p {
 		if !strings.ContainsRune(alpha_upper+alpha_lower+symbols+digits, c) {
-			t.Errorf("Invalid character found: %c", c)
+			t.Errorf("Invalid character found: %c (%x)", c, c)
 			break
 		}
 	}
 }
 
+
+func TestGetLargeNumericPassword(t *testing.T) {
+	p, err := GetNumericPassword(40, 200)
+	if err != nil {
+		t.Fatal("Error generating password", err)
+	}
+	if len(p) > 200 || len(p) < 40 {
+		t.Error("Incorrect sized password returned")
+	}
+	for _, c := range p {
+		if !strings.ContainsRune(digits, c) {
+			t.Errorf("Invalid character found: %c (%x)", c, c)
+			break
+		}
+	}
+}
 func TestPasswordGenerator(t *testing.T) {
 	gen := GetSecurePasswordGenerator()
 	for i := 0; i < 5; i++ {
@@ -143,3 +160,38 @@ func TestPasswordGenerator(t *testing.T) {
 	}
 
 }
+
+
+
+func TestGetPasswordBias(t *testing.T) {
+	N := 10000000
+	var freq [10]map[rune]int
+	for i := 0; i < 10; i++ {
+		freq[i] = make(map[rune]int)
+	}
+	for i := 0; i < N; i++ {
+		p, err := GetNumericPassword(10, 10)
+		if err != nil {
+			t.Fatal("Error generating password", err)
+		}
+		if len(p) != 10 {
+			t.Error("Incorrect sized password returned")
+		}
+		for j, c := range p {
+			if _, ok := freq[j][c]; ok {
+				freq[j][c]++
+			} else {
+				freq[j][c] = 1
+			}
+		}
+	}
+	for i := 0; i < 10; i++ {
+		for _, c := range "0123456789" {
+			cnt := freq[i][c]
+			fmt.Printf("'%c' %5.2f ", c, 100*(float64(cnt)/float64(N))-10.0)
+		}
+		fmt.Println()
+	}
+	t.Fatal("")
+}
+

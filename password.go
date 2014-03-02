@@ -9,6 +9,7 @@ import (
 	"errors"
 	"math"
 	"math/big"
+	"io"
 )
 
 // Get a secure password between min and max characters long
@@ -78,14 +79,12 @@ func (p *PasswordGenerator) GeneratePassword(min, max int) (string, error) {
 		length = int(l.Int64()) + min
 	}
 
-	b := make([]byte, max)
-	_, err := rand.Read(b)
-	if err != nil {
-		return "", errors.New("Unable to generate random data")
+	buf := make([]byte, p.GetMaxLength(max))
+	n := p.generatePassword(buf, rand.Reader)
+	//n := p.generatePassword2(buf)
+	if n < length {
+		return "", errors.New("Didn't generate enough random data")
 	}
-
-	buf := make([]byte, p.GetMaxLength(len(b)))
-	p.generatePassword(buf, []byte(b))
 	return string(buf[0:length]), nil
 
 }
@@ -96,7 +95,7 @@ func NewPasswordGenerator(start byte, size int) *PasswordGenerator {
 
 	// How many characters in the given character space can be drawn from a 32-bit value?
 	for i := 2; i < 32; i++ {
-		if math.Pow(float64(p.CharLen), float64(i)) > math.MaxInt32 {
+		if math.Pow(float64(p.CharLen), float64(i)) > math.MaxUint32 {
 			p.rounds = i - 1
 			break
 		}
@@ -168,25 +167,39 @@ func GetAlphaLowerPasswordGenerator() *PasswordGenerator {
 
 // Get the maximum length in bytes that the generated password might need
 func (p *PasswordGenerator) GetMaxLength(n int) int {
-	return (n + p.rounds - 1) / 4 * p.rounds
+	l :=  (n + p.rounds +1 ) / 4 * p.rounds
+	if l > n {
+		return l
+	}
+	return n
 }
 
 // Generate the password
 // Takes a random byte slice as the source and destination is a byte slice of the random data represented in the chosen character space
 // Returns the number of bytes in the destination byte slice
-// Modeled after ASCII-85 Encode
-func (p *PasswordGenerator) generatePassword(dst, src []byte) int {
-	if len(src) == 0 {
+// Hybrid model based on ASCII-85 Encode and crypto rand.Int 
+func (p *PasswordGenerator) generatePassword(dst []byte, rand io.Reader) int {
+	if rand == nil {
 		return 0
 	}
 
 	n := 0
-	for len(src) > 0 {
-		for i := 0; i < p.rounds; i++ {
-			dst[i] = 0
+	total := len(dst)
+	var bias uint32 
+	t := uint32( math.Pow(float64(p.CharLen), float64(p.rounds)) )
+	d := math.MaxUint32 / t
+	bias = t*d
+
+	for total > n {
+
+		src := make([]byte, 4)
+		nb, err := rand.Read(src)
+		if err != nil || len(src) != 4 {
+			println("Unable to fill src with random data", len(src), nb)
 		}
 
-		// Unpack 4 bytes into uint32 to repack/encode into desired character set.
+
+		// Unpack 4 bytes into uint32.
 		var v uint32
 		switch len(src) {
 		default:
@@ -201,28 +214,49 @@ func (p *PasswordGenerator) generatePassword(dst, src []byte) int {
 		case 1:
 			v |= uint32(src[0]) << 24
 		}
+		
+
+		if v >= bias {
+			// doesn't pass bias check. Get the next set of random data
+			continue
+		}
+
+		// Determine how many rounds we can run
+		rounds := p.rounds
+		if len(dst) < p.rounds {
+			rounds = len(dst)
+		}
+		for i := 0; i < rounds; i++ {
+			dst[i] = 0
+		}
 
 		// Loop through how ever many rounds we can get unique data from 32-bits of data
-		for i := p.rounds - 1; i >= 0; i-- {
+		for i := 0; i < rounds; i++ {
+			next := v  % uint32(p.CharLen) 
 			if p.Func != nil {
-				dst[i] = p.Func(v % uint32(p.CharLen))
+				dst[i] = p.Func(next)
 			} else {
-				dst[i] = p.CharStart + byte(v%uint32(p.CharLen))
+				dst[i] = p.CharStart + byte(next)
 			}
 
 			v /= uint32(p.CharLen)
 		}
-
-		// If src was short, discard the low destination bytes.
-		m := p.rounds
-		if len(src) < p.rounds-1 {
-			m -= p.rounds - 1 - len(src)
-			src = nil
-		} else {
-			src = src[p.rounds:]
-		}
-		dst = dst[m:]
-		n += m
+		
+		dst = dst[rounds:]
+		n += rounds
 	}
 	return n
+}
+
+// A secondary password generator using crypto/rand.Int for random data
+func (p *PasswordGenerator) generatePassword2(dst []byte) int {
+	for i, _ := range dst {
+		next, _ := rand.Int(rand.Reader, big.NewInt(int64(p.CharLen)))
+		if p.Func != nil {
+			dst[i] = p.Func(uint32(next.Int64()))
+		} else {
+			dst[i] = p.CharStart + byte(uint32(next.Int64()))
+		}
+	}
+	return len(dst)
 }
