@@ -48,7 +48,8 @@ func main() {
 			for i := 0; i < numFlag; i++ {
 				p, err := gen.GeneratePassword(minFlag, maxFlag)
 				if err != nil {
-					fmt.Println("Error generating password")
+					fmt.Println("Error generating password:", err)
+					return
 				}
 				fmt.Println(p)
 			}
@@ -62,7 +63,7 @@ func main() {
 		Run: func(cmd *cobra.Command, args []string) {
 			gen, err := passgen.NewPassphraseGenerator(dictFlag, phraseMinFlag, phraseMaxFlag)
 			if err != nil {
-				println("Unable to create passphrase generator")
+				fmt.Println("Unable to create passphrase generator:", err)
 				return
 			}
 			for i := 0; i < numFlag; i++ {

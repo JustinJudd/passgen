@@ -2,16 +2,15 @@ package passgen
 
 import (
 	"bufio"
-	"crypto/rand"
-	"math/big"
-	"os"
-	"strings"
-
 	"bytes"
 	"compress/gzip"
+	"crypto/rand"
 	"encoding/base64"
 	"encoding/gob"
 	"errors"
+	"math/big"
+	"os"
+	"strings"
 )
 
 // Quickly get a Passphrase according to XKCD example(http://xkcd.com/936/)
@@ -45,6 +44,9 @@ func GetXKCDPassphraseGenerator() (*PassphraseGenerator, error) {
 
 // Create a new Passphrase Generator. Use "internal" for the dictfile to use an internal list of words
 func NewPassphraseGenerator(dictFile string, min, max int) (*PassphraseGenerator, error) {
+	if max < min {
+		return nil, errors.New("Max length must be larger than min length")
+	}
 	p := &PassphraseGenerator{MinWordLength: min, MaxWordLength: max, DictionaryFile: dictFile}
 	var err error
 	switch dictFile {

@@ -70,6 +70,9 @@ type PasswordGenerator struct {
 
 // Use the generator to create a password in between the given lengths
 func (p *PasswordGenerator) GeneratePassword(min, max int) (string, error) {
+	if max < min {
+		return "", errors.New("Max length must be larger than min length")
+	}
 	length := min
 	if min != max {
 		l, err := rand.Int(rand.Reader, big.NewInt(int64(max-min)+1))
