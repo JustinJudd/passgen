@@ -2,8 +2,9 @@ package main
 
 import (
 	"fmt"
-	"github.com/JustinJudd/cobra"
-	"github.com/JustinJudd/passgen"
+
+	"github.com/justinjudd/cobra"
+	"github.com/justinjudd/passgen"
 )
 
 var (
@@ -12,8 +13,10 @@ var (
 	maxFlag  int
 	wordFlag int
 
-	typeFlag string
-	dictFlag string
+	phraseMinFlag int
+	phraseMaxFlag int
+	typeFlag      string
+	dictFlag      string
 )
 
 func main() {
@@ -57,7 +60,7 @@ func main() {
 		Short: "passphrase allows for a passphrase to be generated.",
 		Long:  "passphrase allows you to create secure passphrases.",
 		Run: func(cmd *cobra.Command, args []string) {
-			gen, err := passgen.NewPassphraseGenerator(dictFlag, minFlag, maxFlag)
+			gen, err := passgen.NewPassphraseGenerator(dictFlag, phraseMinFlag, phraseMaxFlag)
 			if err != nil {
 				println("Unable to create passphrase generator")
 				return
@@ -77,8 +80,8 @@ func main() {
 
 	passphraseCmd.Flags().IntVarP(&numFlag, "num", "n", 1, "number of passphrases to generate")
 	passphraseCmd.Flags().IntVarP(&wordFlag, "words", "w", 4, "number of words that the passphrase should contain")
-	passphraseCmd.Flags().IntVarP(&minFlag, "min", "m", 4, "minimum length of words to allow")
-	passphraseCmd.Flags().IntVarP(&maxFlag, "max", "x", 10, "maximum length of words to allow")
+	passphraseCmd.Flags().IntVarP(&phraseMinFlag, "min", "m", 4, "minimum length of words to allow")
+	passphraseCmd.Flags().IntVarP(&phraseMaxFlag, "max", "x", 10, "maximum length of words to allow")
 	passphraseCmd.Flags().StringVarP(&dictFlag, "dict", "d", "internal", "dictionary file to use to find words. Uses an internal list by default")
 
 	rootCmd.AddCommand(passwordCmd, passphraseCmd)
@@ -89,21 +92,4 @@ func main() {
 	}
 	return
 
-	p, err := passgen.GetXKCDPassphrase(4)
-	if err != nil {
-		fmt.Println("Error generating passphrase")
-	}
-	fmt.Println(p)
-
-	p, err = passgen.GetNumericPassword(4, 4)
-	if err != nil {
-		fmt.Println("Error generating password")
-	}
-	fmt.Println(p)
-
-	p, err = passgen.GetSecurePassword(14, 40)
-	if err != nil {
-		fmt.Println("Error generating password")
-	}
-	fmt.Println(p)
 }

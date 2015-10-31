@@ -72,7 +72,7 @@ type PasswordGenerator struct {
 func (p *PasswordGenerator) GeneratePassword(min, max int) (string, error) {
 	length := min
 	if min != max {
-		l, err := rand.Int(rand.Reader, big.NewInt(int64(max-min)))
+		l, err := rand.Int(rand.Reader, big.NewInt(int64(max-min)+1))
 		if err != nil {
 			return "", errors.New("Unable to generate random length")
 		}
@@ -248,7 +248,7 @@ func (p *PasswordGenerator) generatePassword(dst []byte, rand io.Reader) int {
 
 // A secondary password generator using crypto/rand.Int for random data
 func (p *PasswordGenerator) generatePassword2(dst []byte) int {
-	for i, _ := range dst {
+	for i := range dst {
 		next, _ := rand.Int(rand.Reader, big.NewInt(int64(p.CharLen)))
 		if p.Func != nil {
 			dst[i] = p.Func(uint32(next.Int64()))
